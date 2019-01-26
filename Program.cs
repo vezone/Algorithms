@@ -9,11 +9,10 @@ namespace Algo_List
     class Algo_List
     {
         /// <summary>
-        /// The Caesar's cipher
+        /// Шифр Цезаря
         /// </summary>
-        /// <param name="input">Input string that you need encrypt or decipher</param>
-        /// <param name="mode">Use 1 - encrypt, 2 - decipher</param>
-        /// <returns></returns>
+        /// <param name="input">Строка, которую требуется зашифровать или расшифровать</param>
+        /// <param name="mode">1 - зашифровать, 0 - расшифровать</param>
         public static string CaesarsCipher(
             string input,
             int mode)
@@ -62,11 +61,11 @@ namespace Algo_List
         }
         
         /// <summary>
-        /// The Vegenere Cipher
+        /// Шифр Виженера
         /// </summary>
-        /// <param name="input">Input string that you need encrypt or decipher</param>
-        /// <param name="mode">Use 1 - encrypt</param>
-        /// <returns></returns>
+        /// <param name="input">Строка, которую требуется зашифровать или расшифровать</param>
+        /// <param name="encryptionWord">Слово для зашифровки или расшифровки</param>
+        /// <param name="mode">1 - зашифровать, 0 - расшифровать</param>
         public static string VegenereCipher(
             string input,
             string encryptionWord,
@@ -127,11 +126,10 @@ namespace Algo_List
         }
 
         /// <summary>
-        /// Euclid's Greatest Common Divisor
+        /// Наибольший общий делитель (Евклид)
         /// </summary>
-        /// <param name="firstNum">First number</param>
-        /// <param name="secondNum">Second number</param>
-        /// <returns></returns>
+        /// <param name="firstNum">Первое число</param>
+        /// <param name="secondNum">Второе число</param>
         public static int GCD(int firstNum, int secondNum)
         {
             while (secondNum != 0)
@@ -142,13 +140,21 @@ namespace Algo_List
             }
             return firstNum;
         }
+        
 
-        public static bool IsPrime(int number, int mode = 0)
+        /// <summary>
+        /// Функция для проверки числа на простоту
+        /// </summary>
+        /// <param name="number">Число для проверки на простоту</param>
+        public static bool IsPrime(int number)
         {
-            if (mode == 0) { return (FindFactors(number).Count > 1 ? false : true); }
-            else { return false; }
+            return (FindFactors(number).Count > 1 ? false : true);
         }
 
+        /// <summary>
+        /// Функция для поиска множителей числа
+        /// </summary>
+        /// <param name="number">Число, для которого требуется найти множители</param>
         public static List<int> FindFactors(int number)
         {
             List<int> factors = new List<int>();
@@ -176,6 +182,10 @@ namespace Algo_List
             return factors;
         }
 
+        /// <summary>
+        /// Функция для поиска простых чисел до некоторого числа
+        /// </summary>
+        /// <param name="maxNumber">Число, до которого требуется найти простые числа</param>
         public static List<int> SieveOfEratosthenes(int maxNumber)
         {
             bool[] isCompositeArray = new bool[maxNumber+1];
@@ -229,11 +239,7 @@ namespace Algo_List
             
             int GCD = Algo_List.GCD(1668, 600);
             Console.WriteLine("GCD: " + GCD);
-#else
-            bool isPrime = Algo_List.IsPrime(607_049, 0);
-            Console.WriteLine($"Number is prime: {isPrime}");
-
-            isPrime = Algo_List.IsPrime(607_049, 1);
+            bool isPrime = Algo_List.IsPrime(607_049);
             Console.WriteLine($"Number is prime: {isPrime}");
 
             List<int> primes = Algo_List.SieveOfEratosthenes(1000);
@@ -249,6 +255,7 @@ namespace Algo_List
                     Console.Write("\n");
                 }
             }
+#else
 
 #endif
             Console.Read();
