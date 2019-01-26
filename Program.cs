@@ -150,7 +150,7 @@ namespace Algo_List
         {
             return (FindFactors(number).Count > 1 ? false : true);
         }
-
+        
         /// <summary>
         /// Функция для поиска множителей числа
         /// </summary>
@@ -220,6 +220,88 @@ namespace Algo_List
             return primes;
         }
 
+        /*
+         Численное интегрирование
+         */
+        public delegate double FunctionPrototype(double x);
+        public delegate double MethodePrototype(
+            FunctionPrototype function,
+            double a, double b, int n);
+
+        public static double[] TestIntegrationRule(
+            MethodePrototype method,
+            FunctionPrototype function,
+            double a, double b, int n,
+            double eps)
+        {
+            int iterations = 0;
+            double result = 0, oldResult;
+            do
+            {
+                n *= 2;
+                oldResult = result;
+                result = method(function, a, b, n);
+                ++iterations;
+            }
+            while (Math.Abs(oldResult - result) > eps);
+
+            return new double[] { result, iterations, n };
+        }
+
+        public static double RectangleRule(
+            FunctionPrototype function,
+            double a, double b, int n)
+        {
+            double h = (b - a) / n;
+            double result = 0;
+
+            for (double x = a; x < b; x += h)
+            {
+                result += h * function(x);
+            }
+
+            return result;
+        }
+
+        public static double TrapezoidRule(
+            FunctionPrototype function,
+            double a, double b, int n)
+        {
+            double h = (b - a) / n;
+            double result = 0;
+
+            for (double x = a; x < b; x += h)
+            {
+                result += h * (function(x) + function(x+h))/2;
+            }
+
+            return result;
+        }
+
+        public static double SimpsonRule(
+            FunctionPrototype function,
+            double a, double b, int n)
+        {
+            double h = (b - a) / n;
+            double result = function(a) + function(b);
+            double x = a; //x < b; x += h
+            for (int node = 0; node < (n-1); node++, x+=h)
+            {
+                if ((node % 2) == 0)
+                {
+                    result += 4*function(x);
+                }
+                else
+                {
+                    result += 2 * function(x);
+                }
+            }
+
+            result *= h / 3;
+
+            return result;
+        }
+
     }
 
 
@@ -256,6 +338,24 @@ namespace Algo_List
                 }
             }
 #else
+            double[] results = Algo_List.TestIntegrationRule(
+                Algo_List.RectangleRule,
+                (double x)=>(1+x+Math.Sin(2*x)),
+                0, 3, 5, 0.01);
+            Console.WriteLine($"Result: {results[0]}\nIterations: {results[1]}\nIntervals: {results[2]}");
+
+            results = Algo_List.TestIntegrationRule(
+                Algo_List.TrapezoidRule,
+                (double x) => (1 + x + Math.Sin(2 * x)),
+                0, 3, 5, 0.01);
+            Console.WriteLine($"Result: {results[0]}\nIterations: {results[1]}\nIntervals: {results[2]}");
+
+            results = Algo_List.TestIntegrationRule(
+                Algo_List.SimpsonRule,
+                (double x) => (1 + x + Math.Sin(2 * x)),
+                0, 3, 5, 0.01);
+            Console.WriteLine($"Result: {results[0]}\nIterations: {results[1]}\nIntervals: {results[2]}");
+
 
 #endif
             Console.Read();
