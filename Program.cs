@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Algo_List
 {
 
-    class Algo_List
+    public class Algo_List
     {
         /// <summary>
         /// Шифр Цезаря
@@ -302,6 +302,76 @@ namespace Algo_List
             return result;
         }
 
+        public static double AdaptiveQuadrature(
+            FunctionPrototype function,
+            double a, double b, int n,
+            double maxSliceError)
+        {
+            double result = 0.0;
+            double h = (b - a) / n;
+            double x = a;
+
+            for (int i = 1; i <= n; i++, x += h)
+            {
+                result += SliceArea(function, x, x+h, maxSliceError);
+            }
+
+            return result;
+        }
+
+        public static double SliceArea(
+            FunctionPrototype function,
+            double x1, double x2, double maxSliceError)
+        {
+            double y1 = function(x1);
+            double y2 = function(x2);
+            double xMid = (x1 + x2) / 2;
+            double yMid = (y1 + y2) / 2;
+
+            double area12 = (x2 - x1) * (y1 + y2) / 2.0;
+            double area1Mid = (xMid - x1) * (y1 + yMid) / 2.0;
+            double areaMid2 = (x2 - xMid) * (yMid + y2) / 2.0;
+            double areaSum = area1Mid + areaMid2;
+
+            double error = (areaSum - area12) / area12;
+
+            if (Math.Abs(error) < maxSliceError)
+            {
+                return areaSum;
+            }
+
+            return SliceArea(function, x1, xMid, maxSliceError) + 
+                   SliceArea(function, xMid, x2, maxSliceError);
+        }
+
+        /// <summary>
+        /// Функция для поиска решения функции
+        /// </summary>
+        /// <param name="f">Фунция</param>
+        /// <param name="df">Производная функции</param>
+        /// <param name="x0">Начальное приближение</param>
+        /// <param name="maxError">Максимально доступная ошибка (отклонение)</param>
+        public static double[] FunctionDecisionNewton(
+            FunctionPrototype f,
+            FunctionPrototype df,
+            double x0,
+            double maxError)
+        {
+            double y = 0.0;
+            for (int i = 0; i < 100; i++)
+            {
+                y = f(x0);
+                if (Math.Abs(y) < maxError)
+                {
+                    return new double[] { x0, i };
+                }
+                x0 -= y / df(x0);
+            }
+
+
+            return new double[] { x0, 100 };
+        }
+
     }
 
 
@@ -337,7 +407,6 @@ namespace Algo_List
                     Console.Write("\n");
                 }
             }
-#else
             double[] results = Algo_List.TestIntegrationRule(
                 Algo_List.RectangleRule,
                 (double x)=>(1+x+Math.Sin(2*x)),
@@ -356,9 +425,152 @@ namespace Algo_List
                 0, 3, 5, 0.01);
             Console.WriteLine($"Result: {results[0]}\nIterations: {results[1]}\nIntervals: {results[2]}");
 
+            results[0] = Algo_List.AdaptiveQuadrature(
+                (double x) => (1 + x + Math.Sin(2 * x)),
+                0, 3, 5, 0.01);
+            Console.WriteLine($"Result: {results[0]}");
+
+            double[] results = Algo_List.FunctionDecisionNewton(
+                (x)=>Math.Sin(x),
+                (x)=>Math.Cos(x),
+                3,
+                0.1);
+            Console.WriteLine($"x0: {results[0]}\nIters: {results[1]}");
+
+            /*
+             using class LinkedListOneWay
+             */
+            LinkedListOneWay top = new LinkedListOneWay();
+
+            LinkedListOneWay pointer = top;
+            for (int i = 1; i < 10; i++)
+            {
+                LinkedListOneWay.Add(ref pointer, i);
+                LinkedListOneWay.Next(ref pointer);
+            }
+
+            LinkedListOneWay value = 
+                LinkedListOneWay.FindCell(ref top, 5);
+            Console.Write($"Value we find: {value.Data}\n" +
+                $"Next value: {value.Link.Data}\n");
+            LinkedListOneWay.Print(top);
+            for (int i = 0; i < 5; i++)
+            {
+                LinkedListOneWay.RemoveCell(ref top, i);
+            }
+
+            LinkedListOneWay.AddForward(ref top, -1);
+            LinkedListOneWay.Print(top);
+#else
+
+
 
 #endif
             Console.Read();
         }
+
     }
+    
+    public class LinkedListOneWay
+    {
+        public int Data;
+        public LinkedListOneWay Link;
+        
+        public static void Add(ref LinkedListOneWay @this, int data)
+        {
+            LinkedListOneWay linkedList = new LinkedListOneWay();
+            linkedList.Data = data;
+            @this.Link = linkedList;
+        }
+
+        public static void AddForward(ref LinkedListOneWay root, 
+            int data)
+        {
+            LinkedListOneWay linkedList = new LinkedListOneWay();
+            linkedList.Data = data;
+            linkedList.Link = root;
+            root = linkedList;
+        }
+
+        public static void Next(ref LinkedListOneWay @this)
+        {
+            if (@this != null)
+                @this = @this.Link;
+        }
+
+        public static LinkedListOneWay FindCell(
+            ref LinkedListOneWay root, 
+            int valueToFind)
+        {
+            LinkedListOneWay pointer = root;
+
+            while (pointer.Link != null)
+            {
+                if (pointer.Data == valueToFind)
+                {
+                    return pointer;
+                }
+                else
+                {
+                    Next(ref pointer);
+                }
+            }
+
+            return null;
+        }
+
+        public static void RemoveCell(
+            ref LinkedListOneWay root,
+            int valueToFind)
+        {
+            LinkedListOneWay pointer = root;
+
+            while (pointer.Link != null)
+            {
+                if (pointer.Data == valueToFind)
+                {
+                    //delete root
+                    LinkedListOneWay temp = root.Link;
+                    root = null;
+                    root = temp;
+                    return;
+                }
+                else if (pointer.Link.Data == valueToFind)
+                {
+                    LinkedListOneWay temp = pointer.Link.Link;
+                    pointer.Link = null;
+                    pointer.Link = temp;
+                    return;
+                }
+                else
+                {
+                    Next(ref pointer);
+                }
+            }
+        }
+
+        public static void Print(LinkedListOneWay root)
+        {
+            LinkedListOneWay pointer = root;
+            while (pointer != null)
+            {
+                Console.Write(pointer.Data + " ");
+                Next(ref pointer);
+            }
+            Console.Write("\n");
+        }
+
+    }
+
+    public class LinkedListTwoWay
+    {
+        public int Data;
+        public LinkedListTwoWay Prev;
+        public LinkedListTwoWay Next;
+
+
+
+    }
+
+
 }
